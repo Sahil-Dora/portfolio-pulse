@@ -1,7 +1,8 @@
 import { Link } from '@tanstack/react-router';
 import { ArrowUpRight, ArrowDownRight, Wallet, TrendingUp, ChartNoAxesCombined, Layers, CalendarDays, ChevronRight, Bitcoin, Diamond, Apple, Car, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { holdingMetrics, mockHoldings, portfolioSummary as s, signedPct, signedUsd, usd } from '@/lib/portfolio-data';
+import { usePortfolio } from '@/lib/transaction-store';
+import { holdingMetrics, signedPct, signedUsd, usd } from '@/lib/portfolio-data';
 import { AllocationPanel, PerformancePanel } from './portfolio-charts';
 
 const icons: Record<string, { icon: LucideIcon; type: string }> = {
@@ -9,11 +10,13 @@ const icons: Record<string, { icon: LucideIcon; type: string }> = {
 };
 
 export function HoldingsTable() {
-  const rows = mockHoldings.map(holdingMetrics).sort((a, b) => b.value - a.value);
+  const { holdings } = usePortfolio();
+  const rows = holdings.map(holdingMetrics).sort((a, b) => b.value - a.value);
   return <div className="table-wrap"><table className="holdings-table"><thead><tr><th>Asset</th><th>Price</th><th>24h change</th><th>Value</th></tr></thead><tbody>{rows.map((h) => { const { icon: Icon, type } = icons[h.symbol] ?? { icon: Layers, type: "" }; return <tr key={h.symbol}><td><div className="asset"><span className={`asset-icon ${type}`}><Icon size={17} /></span><div><strong>{h.symbol}</strong><small>{h.name}</small></div></div></td><td>{usd(h.price)}</td><td className={h.dayChangePct >= 0 ? 'positive' : 'negative'}>{signedPct(h.dayChangePct)}</td><td>{usd(h.value)}</td></tr>; })}</tbody></table></div>;
 }
 
 export function Overview() {
+  const { summary: s } = usePortfolio();
   const metrics = [
     { label: 'Total portfolio value', value: usd(s.totalValue), change: signedUsd(s.dayChange), context: 'today', up: s.dayChange >= 0, icon: Wallet },
     { label: 'Total profit / loss', value: signedUsd(s.totalProfitLoss), change: signedPct(s.totalProfitLossPct), context: 'on cost basis', up: s.totalProfitLoss >= 0, icon: TrendingUp },
