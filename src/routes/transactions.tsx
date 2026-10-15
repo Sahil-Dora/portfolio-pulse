@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { WorkspacePage } from '@/components/pulse/workspace-page';
+import { TransactionLedger } from '@/components/pulse/transaction-ledger';
 export const Route = createFileRoute('/transactions')({
   head: () => ({ meta: [
     { title: 'Transactions | Portfolio Pulse' },
@@ -11,4 +11,6 @@ export const Route = createFileRoute('/transactions')({
   ] }),
   component: Page,
 });
-function Page() { return <WorkspacePage section="transactions" />; }
+function Page() {
+  return <div className="page"><div className="page-heading"><div><h1>Transactions</h1><p>Your investment activity in one place · simulated data.</p></div></div><TransactionLedger /><footer className="page-footer"><span>Simulated data · Not connected to live markets</span><span>Portfolio Pulse © 2026</span></footer></div>;
+}
