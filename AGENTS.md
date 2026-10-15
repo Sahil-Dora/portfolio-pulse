@@ -12,3 +12,4 @@
 - Keep the shared Portfolio Pulse shell around the root Outlet and give each navigation destination a leaf route, so navigation stays consistent and directly addressable.
 - Keep initial portfolio displays as explicitly labeled static sample data; do not imply a live market or connected account before those services exist.
 - Define visual roles in src/styles.css and use shared design-system controls, so the interface remains consistent as screens expand.
+- Holdings are derived from the transaction ledger in src/lib/transaction-store.ts (browser localStorage, validated on load); never keep a separate editable holdings list, so ledger and dashboard can't drift.
