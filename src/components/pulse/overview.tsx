@@ -10,7 +10,7 @@ const icons: Record<string, { icon: LucideIcon; type: string }> = {
 
 export function HoldingsTable() {
   const rows = mockHoldings.map(holdingMetrics).sort((a, b) => b.value - a.value);
-  return <div className="table-wrap"><table className="holdings-table"><thead><tr><th>Asset</th><th>Price</th><th>24h change</th><th>Value</th></tr></thead><tbody>{rows.map((h) => { const { icon: Icon, type } = icons[h.symbol]; return <tr key={h.symbol}><td><div className="asset"><span className={`asset-icon ${type}`}><Icon size={17} /></span><div><strong>{h.symbol}</strong><small>{h.name}</small></div></div></td><td>{usd(h.price)}</td><td className={h.dayChangePct >= 0 ? 'positive' : 'negative'}>{signedPct(h.dayChangePct)}</td><td>{usd(h.value)}</td></tr>; })}</tbody></table></div>;
+  return <div className="table-wrap"><table className="holdings-table"><thead><tr><th>Asset</th><th>Price</th><th>24h change</th><th>Value</th></tr></thead><tbody>{rows.map((h) => { const { icon: Icon, type } = icons[h.symbol] ?? { icon: Layers, type: "" }; return <tr key={h.symbol}><td><div className="asset"><span className={`asset-icon ${type}`}><Icon size={17} /></span><div><strong>{h.symbol}</strong><small>{h.name}</small></div></div></td><td>{usd(h.price)}</td><td className={h.dayChangePct >= 0 ? 'positive' : 'negative'}>{signedPct(h.dayChangePct)}</td><td>{usd(h.value)}</td></tr>; })}</tbody></table></div>;
 }
 
 export function Overview() {

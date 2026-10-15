@@ -10,8 +10,8 @@ const fmtDate = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString('en
 export function PerformancePanel() {
   const [range, setRange] = useState<RangeKey>('1M');
   const data = sliceHistory(portfolioHistory, range);
-  const first = data[0].value, last = data[data.length - 1].value;
-  const pct = ((last - first) / first) * 100;
+  const first = data[0]?.value ?? 0, last = data[data.length - 1]?.value ?? 0;
+  const pct = first ? ((last - first) / first) * 100 : 0;
   const up = pct >= 0;
   return <section className="panel">
     <div className="panel-head"><div><h2>Portfolio performance</h2><p className="panel-subtitle">Simulated portfolio value over time</p></div>

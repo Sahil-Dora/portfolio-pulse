@@ -84,7 +84,7 @@ export function buildHistory(endValue: number, endDate = new Date(Date.UTC(2026,
   const raw: number[] = [];
   let v = 1;
   for (let i = 0; i < days; i++) { v *= 1 + (rand() - 0.47) * 0.024 + Math.sin(i / 18) * 0.002; raw.push(v); }
-  const scale = endValue / raw[raw.length - 1];
+  const scale = endValue / (raw[raw.length - 1] ?? 1);
   return raw.map((r, i) => {
     const d = new Date(endDate);
     d.setUTCDate(d.getUTCDate() - (days - 1 - i));
