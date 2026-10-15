@@ -19,14 +19,14 @@ export const transactionTotal = (t: Pick<Transaction, 'quantity' | 'price'>) => 
 
 export const mockTransactions: Transaction[] = [
   { id: 't1', date: '2025-11-04', symbol: 'AAPL', type: 'buy', quantity: 100, price: 152.4 },
-  { id: 't2', date: '2025-12-12', symbol: 'BTC', type: 'buy', quantity: 0.5, price: 51200 },
+  { id: 't2', date: '2025-12-12', symbol: 'BTC', type: 'buy', quantity: 0.5, price: 52000 },
   { id: 't3', date: '2026-01-08', symbol: 'NVDA', type: 'buy', quantity: 20, price: 610 },
   { id: 't4', date: '2026-02-19', symbol: 'ETH', type: 'buy', quantity: 4, price: 2900 },
   { id: 't5', date: '2026-03-27', symbol: 'AAPL', type: 'buy', quantity: 50, price: 160.2 },
   { id: 't6', date: '2026-05-14', symbol: 'TSLA', type: 'buy', quantity: 30, price: 215 },
   { id: 't7', date: '2026-07-02', symbol: 'BTC', type: 'sell', quantity: 0.1, price: 61850 },
   { id: 't8', date: '2026-09-21', symbol: 'TSLA', type: 'sell', quantity: 5, price: 241.1 },
-  { id: 't9', date: '2026-09-30', symbol: 'TSLA', type: 'buy', quantity: 5, price: 236.8 },
+  { id: 't9', date: '2026-09-30', symbol: 'TSLA', type: 'buy', quantity: 5, price: 215 },
 ];
 
 export const LEDGER_TODAY = '2026-10-15';

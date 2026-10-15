@@ -2,14 +2,16 @@ import { useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { allocation, mockHoldings, portfolioHistory, rangeDays, signedPct, sliceHistory, usd, type RangeKey } from '@/lib/portfolio-data';
+import { usePortfolio } from '@/lib/transaction-store';
+import { allocation, rangeDays, signedPct, sliceHistory, usd, type RangeKey } from '@/lib/portfolio-data';
 
 const ranges = Object.keys(rangeDays) as RangeKey[];
 const fmtDate = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 
 export function PerformancePanel() {
   const [range, setRange] = useState<RangeKey>('1M');
-  const data = sliceHistory(portfolioHistory, range);
+  const { history } = usePortfolio();
+  const data = sliceHistory(history, range);
   const first = data[0]?.value ?? 0, last = data[data.length - 1]?.value ?? 0;
   const pct = first ? ((last - first) / first) * 100 : 0;
   const up = pct >= 0;
@@ -34,7 +36,8 @@ export function PerformancePanel() {
 }
 
 export function AllocationPanel() {
-  const slices = allocation(mockHoldings);
+  const { holdings } = usePortfolio();
+  const slices = allocation(holdings);
   const colors = { stock: 'var(--stock)', crypto: 'var(--crypto)' };
   return <section className="panel">
     <div className="panel-head"><div><h2>Asset allocation</h2><p className="panel-subtitle">Stocks vs crypto by value</p></div></div>
@@ -43,7 +46,7 @@ export function AllocationPanel() {
         <PieChart><Pie data={slices} dataKey="value" nameKey="label" innerRadius="70%" outerRadius="100%" stroke="var(--card)" strokeWidth={2} isAnimationActive={false}>{slices.map((s) => <Cell key={s.assetClass} fill={colors[s.assetClass]} />)}</Pie>
           <Tooltip formatter={(v: number) => usd(v)} contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 11 }} /></PieChart>
       </ResponsiveContainer>
-      <div className="donut-label"><small>Total assets</small><strong>{mockHoldings.length}</strong></div>
+      <div className="donut-label"><small>Total assets</small><strong>{holdings.length}</strong></div>
     </div>
     <div className="allocation-list">{slices.map((s) => <div key={s.assetClass}><span><i className={`allocation-dot ${s.assetClass === 'stock' ? 'stocks' : 'crypto'}`} />{s.label}</span><strong>{s.percent.toFixed(1)}%</strong></div>)}</div>
   </section>;

@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usd } from '@/lib/portfolio-data';
-import { LEDGER_TODAY, assetName, ledgerAssets, mockTransactions, netQuantity, transactionSchema, transactionTotal, type Transaction } from '@/lib/transactions-data';
+import { addTransaction, availableQuantity, usePortfolio } from '@/lib/transaction-store';
+import { LEDGER_TODAY, assetName, ledgerAssets, transactionSchema, transactionTotal, type Transaction } from '@/lib/transactions-data';
 
 type Errors = Partial<Record<'date' | 'symbol' | 'type' | 'quantity' | 'price', string>>;
 const emptyForm = { date: LEDGER_TODAY, symbol: '', type: 'buy', quantity: '', price: '' };
@@ -12,7 +13,7 @@ const fmtDate = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString('en
 const fmtQty = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 8 });
 
 export function TransactionLedger() {
-  const [items, setItems] = useState<Transaction[]>(mockTransactions);
+  const items = usePortfolio().transactions;
   const [query, setQuery] = useState('');
   const [asset, setAsset] = useState('all');
   const [type, setType] = useState('all');
@@ -35,13 +36,14 @@ export function TransactionLedger() {
     const next: Errors = {};
     if (!parsed.success) for (const issue of parsed.error.issues) { const k = issue.path[0] as keyof Errors; next[k] ??= issue.message; }
     else if (parsed.data.type === 'sell') {
-      const held = netQuantity(items, parsed.data.symbol);
+      const held = availableQuantity(parsed.data.symbol, parsed.data.date);
       if (parsed.data.quantity > held + 1e-9) next.quantity = `You only hold ${fmtQty(held)} ${parsed.data.symbol}`;
     }
     setErrors(next);
     if (Object.keys(next).length || !parsed.success) return;
     const t: Transaction = { id: `n${Date.now()}`, ...parsed.data };
-    setItems((list) => [...list, t]);
+    const failure = addTransaction(t);
+    if (failure) { setErrors({ quantity: failure }); return; }
     setForm({ ...emptyForm, date: parsed.data.date });
     setNotice(`Recorded ${t.type} of ${fmtQty(t.quantity)} ${t.symbol} · ${usd(transactionTotal(t))}`);
   }
