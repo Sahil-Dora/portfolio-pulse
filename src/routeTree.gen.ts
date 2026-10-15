@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as PortfoliosRouteImport } from './routes/portfolios'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as TransactionsRouteImport } from './routes/transactions'
+import { Route as WatchlistRouteImport } from './routes/watchlist'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfoliosRoute = PortfoliosRouteImport.update({
+  id: '/portfolios',
+  path: '/portfolios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransactionsRoute = TransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WatchlistRoute = WatchlistRouteImport.update({
+  id: '/watchlist',
+  path: '/watchlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
+  '/portfolios': typeof PortfoliosRoute
+  '/settings': typeof SettingsRoute
+  '/transactions': typeof TransactionsRoute
+  '/watchlist': typeof WatchlistRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
+  '/portfolios': typeof PortfoliosRoute
+  '/settings': typeof SettingsRoute
+  '/transactions': typeof TransactionsRoute
+  '/watchlist': typeof WatchlistRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
+  '/portfolios': typeof PortfoliosRoute
+  '/settings': typeof SettingsRoute
+  '/transactions': typeof TransactionsRoute
+  '/watchlist': typeof WatchlistRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/analytics'
+    | '/portfolios'
+    | '/settings'
+    | '/transactions'
+    | '/watchlist'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/analytics'
+    | '/portfolios'
+    | '/settings'
+    | '/transactions'
+    | '/watchlist'
+  id:
+    | '__root__'
+    | '/'
+    | '/analytics'
+    | '/portfolios'
+    | '/settings'
+    | '/transactions'
+    | '/watchlist'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalyticsRoute: typeof AnalyticsRoute
+  PortfoliosRoute: typeof PortfoliosRoute
+  SettingsRoute: typeof SettingsRoute
+  TransactionsRoute: typeof TransactionsRoute
+  WatchlistRoute: typeof WatchlistRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolios': {
+      id: '/portfolios'
+      path: '/portfolios'
+      fullPath: '/portfolios'
+      preLoaderRoute: typeof PortfoliosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transactions': {
+      id: '/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof TransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/watchlist': {
+      id: '/watchlist'
+      path: '/watchlist'
+      fullPath: '/watchlist'
+      preLoaderRoute: typeof WatchlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalyticsRoute: AnalyticsRoute,
+  PortfoliosRoute: PortfoliosRoute,
+  SettingsRoute: SettingsRoute,
+  TransactionsRoute: TransactionsRoute,
+  WatchlistRoute: WatchlistRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
