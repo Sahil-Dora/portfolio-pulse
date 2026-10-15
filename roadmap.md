@@ -2,3 +2,4 @@
 - [x] Create the premium responsive app shell and navigation.
 - [x] Add initial destination layouts without advanced features.
 - [x] Verify desktop, mobile, and navigation.
+- [x] Phase 2: typed mock holdings, calculated KPIs, range chart, allocation doughnut.

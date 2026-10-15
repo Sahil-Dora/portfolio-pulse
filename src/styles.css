@@ -108,6 +108,9 @@
 .page-footer { margin-top: 23px; display: flex; justify-content: space-between; color: var(--muted-foreground); font-size: 9px; gap: 10px; }
 .destination { min-height: 440px; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 13px; } .destination-icon { color: var(--primary); width: 48px; height: 48px; background: var(--accent); display: grid; place-items: center; border-radius: 8px; } .destination h2 { font-size: 17px; font-weight: 700; } .destination p { font-size: 12px; color: var(--muted-foreground); }
 .mobile-overlay { display: none; }
+.range-filter { display: flex; gap: 2px; border: 1px solid var(--border); border-radius: 6px; padding: 2px; } .range-filter button { height: 26px; padding: 0 9px; font-size: 10px; }
+.donut-label { pointer-events: none; } .asset-icon.tesla { background: var(--secondary); color: var(--destructive); }
+@media (max-width: 700px) { .chart-row .panel-head { flex-wrap: wrap; } }
 @media (min-width: 1500px) { .page { padding-top: 42px; } .performance-chart { height: 265px; } .allocation-visual { margin-top: 36px; margin-bottom: 34px; } }
 @media (max-width: 1150px) { .sidebar { width: 210px; } .app-main { margin-left: 210px; } .brand { font-size: 17px; } .page { padding: 28px 24px; } .topbar { padding: 0 24px; } .metrics { gap: 12px; } .metric { padding: 16px; } .metric-value { font-size: 21px; } .chart-row,.lower-row { grid-template-columns: minmax(0,1.7fr) minmax(245px,1fr); gap: 16px; } .holdings-table td,.holdings-table th { padding-left: 14px; padding-right: 14px; } }
 @media (max-width: 900px) { .chart-row,.lower-row { grid-template-columns: 1fr; } .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } .allocation-list { max-width: 320px; margin-left: auto; margin-right: auto; padding: 0 20px; } .heading-meta { display: none; } }
