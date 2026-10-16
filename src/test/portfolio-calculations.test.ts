@@ -70,7 +70,6 @@ describe('portfolio totals', () => {
 describe('transaction store', () => {
   beforeEach(() => { localStorage.clear(); vi.resetModules(); });
   const load = async () => (await import('@/lib/transaction-store'));
-  const snapshot = (m: Awaited<ReturnType<typeof load>>) => { let s; const { usePortfolio: _ } = m; s = m; return s; };
 
   it('rejects overselling and leaves state unchanged', async () => {
     const m = await load();
@@ -109,6 +108,5 @@ describe('transaction store', () => {
     localStorage.setItem(KEY, raw);
     const m = await load();
     expect(m.availableQuantity('TSLA', '2026-10-15')).toBe(30);
-    void snapshot;
   });
 });
