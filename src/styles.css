@@ -130,3 +130,7 @@
 .ledger-total { display: flex; justify-content: space-between; font-size: 12px; border-top: 1px solid var(--border); padding-top: 12px; } .ledger-total span { color: var(--muted-foreground); }
 .ledger-notice { font-size: 11px; color: var(--positive); min-height: 14px; }
 @media (max-width: 900px) { .ledger-grid { grid-template-columns: 1fr; } }
+.health-score { display: flex; align-items: baseline; gap: 6px; } .health-score strong { font-size: 22px; } .health-score span { font-size: 12px; color: var(--muted-foreground); }
+.health-note { display: block; font-size: 11px; color: var(--muted-foreground); font-weight: 400; white-space: normal; max-width: 280px; }
+.health-status { font-size: 12px; font-weight: 600; white-space: nowrap; } .health-status.pass { color: var(--positive); } .health-status.warn { color: var(--primary); } .health-status.fail { color: var(--destructive); }
+.health-disclaimer { margin-top: 12px; font-size: 12px; color: var(--muted-foreground); }
