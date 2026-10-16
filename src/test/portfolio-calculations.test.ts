@@ -8,25 +8,25 @@ const KEY = 'portfolio-pulse:transactions:v1';
 
 describe('average cost', () => {
   it('averages multiple buys', () => {
-    const [h] = holdingsFromTransactions([tx('a', '2026-01-01', 'AAPL', 'buy', 10, 100), tx('b', '2026-01-02', 'AAPL', 'buy', 10, 200)]);
+    const h = holdingsFromTransactions([tx('a', '2026-01-01', 'AAPL', 'buy', 10, 100), tx('b', '2026-01-02', 'AAPL', 'buy', 10, 200)])[0]!;
     expect(h.quantity).toBe(20);
     expect(h.avgCost).toBeCloseTo(150, 10);
   });
   it('keeps average cost unchanged after a partial sell', () => {
-    const [h] = holdingsFromTransactions([tx('a', '2026-01-01', 'AAPL', 'buy', 10, 100), tx('b', '2026-01-02', 'AAPL', 'buy', 10, 200), tx('c', '2026-01-03', 'AAPL', 'sell', 5, 999)]);
+    const h = holdingsFromTransactions([tx('a', '2026-01-01', 'AAPL', 'buy', 10, 100), tx('b', '2026-01-02', 'AAPL', 'buy', 10, 200), tx('c', '2026-01-03', 'AAPL', 'sell', 5, 999)])[0]!;
     expect(h.quantity).toBe(15);
     expect(h.avgCost).toBeCloseTo(150, 10);
   });
   it('resets average cost after selling to zero and rebuying', () => {
-    const [h] = holdingsFromTransactions([tx('a', '2026-01-01', 'AAPL', 'buy', 10, 100), tx('b', '2026-01-02', 'AAPL', 'sell', 10, 120), tx('c', '2026-01-03', 'AAPL', 'buy', 2, 300)]);
+    const h = holdingsFromTransactions([tx('a', '2026-01-01', 'AAPL', 'buy', 10, 100), tx('b', '2026-01-02', 'AAPL', 'sell', 10, 120), tx('c', '2026-01-03', 'AAPL', 'buy', 2, 300)])[0]!;
     expect(h.quantity).toBe(2);
     expect(h.avgCost).toBeCloseTo(300, 10);
   });
   it('applies trades by date regardless of input order (backdated buy)', () => {
     const ordered = [tx('a', '2026-01-01', 'AAPL', 'buy', 10, 100), tx('b', '2026-02-01', 'AAPL', 'sell', 5, 150), tx('c', '2026-03-01', 'AAPL', 'buy', 5, 200)];
-    const shuffled = [ordered[2], ordered[0], ordered[1]];
+    const shuffled = [ordered[2]!, ordered[0]!, ordered[1]!];
     expect(holdingsFromTransactions(shuffled)).toEqual(holdingsFromTransactions(ordered));
-    expect(holdingsFromTransactions(ordered)[0].avgCost).toBeCloseTo(150, 10);
+    expect(holdingsFromTransactions(ordered)[0]!.avgCost).toBeCloseTo(150, 10);
   });
   it('reproduces the sample holdings from the sample ledger', () => {
     const derived = holdingsFromTransactions(mockTransactions);
@@ -43,7 +43,7 @@ describe('rounding', () => {
     expect(holdingsFromTransactions([tx('a', '2026-01-01', 'BTC', 'buy', 0.1, 50000), tx('b', '2026-01-01', 'BTC', 'buy', 0.2, 50000), tx('c', '2026-01-02', 'BTC', 'sell', 0.3, 60000)])).toEqual([]);
   });
   it('rounds quantity to 8 decimals', () => {
-    const [h] = holdingsFromTransactions([tx('a', '2026-01-01', 'BTC', 'buy', 0.1, 1), tx('b', '2026-01-01', 'BTC', 'buy', 0.2, 1)]);
+    const h = holdingsFromTransactions([tx('a', '2026-01-01', 'BTC', 'buy', 0.1, 1), tx('b', '2026-01-01', 'BTC', 'buy', 0.2, 1)])[0]!;
     expect(h.quantity).toBe(0.3);
   });
 });
