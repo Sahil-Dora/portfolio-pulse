@@ -1,8 +1,10 @@
 // Browser-only persistence for the simulated ledger (localStorage). No backend.
 import { useSyncExternalStore } from 'react';
 import { z } from 'zod';
-import { buildHistory, mockHoldings, summarize, type Holding } from './portfolio-data';
+import { buildHistory, summarize } from './portfolio-data';
 import { ledgerAssets, mockTransactions, type Transaction } from './transactions-data';
+import { holdingsFromTransactions } from './ledger-accounting';
+export { holdingsFromTransactions } from './ledger-accounting';
 
 const STORAGE_KEY = 'portfolio-pulse:transactions:v1';
 
@@ -14,21 +16,6 @@ const storedSchema = z.array(z.object({
   quantity: z.number().positive().finite(),
   price: z.number().positive().finite(),
 })).max(10_000);
-
-/** Average-cost holdings derived from the ledger, priced with the simulated quotes. */
-export function holdingsFromTransactions(txs: Transaction[]): Holding[] {
-  const sorted = [...txs].sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
-  return mockHoldings.flatMap((quote) => {
-    let quantity = 0, cost = 0;
-    for (const t of sorted) {
-      if (t.symbol !== quote.symbol) continue;
-      if (t.type === 'buy') { quantity += t.quantity; cost += t.quantity * t.price; }
-      else { const q = Math.min(t.quantity, quantity); cost -= quantity ? (cost / quantity) * q : 0; quantity -= q; }
-    }
-    if (quantity <= 1e-9) return [];
-    return [{ ...quote, quantity: Math.round(quantity * 1e8) / 1e8, avgCost: cost / quantity }];
-  });
-}
 
 /** Ledger is valid only if no sell ever exceeds the quantity held at that point. */
 function isConsistent(txs: Transaction[]) {
