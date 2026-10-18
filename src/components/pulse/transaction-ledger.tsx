@@ -1,10 +1,11 @@
 import { useMemo, useState, type FormEvent } from 'react';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usd } from '@/lib/portfolio-data';
-import { addTransaction, availableQuantity, usePortfolio } from '@/lib/transaction-store';
+import { addTransaction, availableQuantity, deleteTransaction, usePortfolio } from '@/lib/transaction-store';
+import { LedgerTools, ConfirmLedgerAction } from './ledger-tools';
 import { LEDGER_TODAY, assetName, ledgerAssets, transactionSchema, transactionTotal, type Transaction } from '@/lib/transactions-data';
 
 type Errors = Partial<Record<'date' | 'symbol' | 'type' | 'quantity' | 'price', string>>;
@@ -51,7 +52,7 @@ export function TransactionLedger() {
   const field = (k: keyof Errors) => ({ 'aria-invalid': !!errors[k] || undefined, 'aria-describedby': errors[k] ? `tx-${k}-error` : undefined });
   const err = (k: keyof Errors) => errors[k] && <p id={`tx-${k}-error`} className="field-error">{errors[k]}</p>;
 
-  return <div className="ledger-grid">
+  return <><LedgerTools /><div className="ledger-grid">
     <section className="panel">
       <div className="panel-head"><div><h2>Transaction history</h2><p className="panel-subtitle">{rows.length} of {items.length} simulated transactions</p></div><span className="plan-tag">SIMULATED</span></div>
       <div className="ledger-filters">
@@ -59,12 +60,12 @@ export function TransactionLedger() {
         <select className="pulse-select" value={asset} onChange={(e) => setAsset(e.target.value)} aria-label="Filter by asset"><option value="all">All assets</option>{ledgerAssets.map((a) => <option key={a.symbol} value={a.symbol}>{a.symbol}</option>)}</select>
         <select className="pulse-select" value={type} onChange={(e) => setType(e.target.value)} aria-label="Filter by type"><option value="all">All types</option><option value="buy">Buy</option><option value="sell">Sell</option></select>
       </div>
-      <div className="table-wrap"><table className="holdings-table"><thead><tr><th>Date</th><th>Asset</th><th>Symbol</th><th>Type</th><th>Quantity</th><th>Price</th><th>Total</th></tr></thead>
-        <tbody>{rows.length ? rows.map((t) => <tr key={t.id}><td>{fmtDate(t.date)}</td><td>{assetName(t.symbol)}</td><td><strong>{t.symbol}</strong></td><td><span className={`tx-type ${t.type}`}>{t.type === 'buy' ? 'Buy' : 'Sell'}</span></td><td>{fmtQty(t.quantity)}</td><td>{usd(t.price)}</td><td>{usd(transactionTotal(t))}</td></tr>)
-          : <tr><td colSpan={7} className="ledger-empty">No transactions match your filters.</td></tr>}</tbody></table></div>
+      <div className="table-wrap"><table className="holdings-table"><thead><tr><th>Date</th><th>Asset</th><th>Symbol</th><th>Type</th><th>Quantity</th><th>Price</th><th>Total</th><th>Delete</th></tr></thead>
+        <tbody>{rows.length ? rows.map((t) => <tr key={t.id}><td>{fmtDate(t.date)}</td><td>{assetName(t.symbol)}</td><td><strong>{t.symbol}</strong></td><td><span className={`tx-type ${t.type}`}>{t.type === 'buy' ? 'Buy' : 'Sell'}</span></td><td>{fmtQty(t.quantity)}</td><td>{usd(t.price)}</td><td>{usd(transactionTotal(t))}</td><td><ConfirmLedgerAction title={`Delete ${t.id}`} description={`Delete ${t.type} of ${fmtQty(t.quantity)} ${t.symbol} on ${fmtDate(t.date)}? Deletion is blocked if a later sale would exceed holdings.`} onConfirm={() => { const failure = deleteTransaction(t.id, items); setNotice(failure ?? 'Transaction deleted'); }}><Trash2 size={14} /></ConfirmLedgerAction></td></tr>)
+          : <tr><td colSpan={8} className="ledger-empty">No transactions match your filters.</td></tr>}</tbody></table></div>
     </section>
     <section className="panel">
-      <div className="panel-head"><div><h2>Record a transaction</h2><p className="panel-subtitle">Saved for this session only · simulated</p></div></div>
+      <div className="panel-head"><div><h2>Record a transaction</h2><p className="panel-subtitle">Saved in this browser · simulated</p></div></div>
       <form className="ledger-form" onSubmit={submit} noValidate>
         <div className="tx-type-toggle" role="radiogroup" aria-label="Transaction type">{(['buy', 'sell'] as const).map((v) => <Button key={v} type="button" role="radio" aria-checked={form.type === v} variant={form.type === v ? 'default' : 'ghost'} size="sm" onClick={() => set('type', v)}>{v === 'buy' ? 'Buy' : 'Sell'}</Button>)}</div>
         <div><Label htmlFor="tx-symbol">Asset</Label><select id="tx-symbol" className="pulse-select w-full" value={form.symbol} onChange={(e) => set('symbol', e.target.value)} {...field('symbol')}><option value="">Choose an asset</option>{ledgerAssets.map((a) => <option key={a.symbol} value={a.symbol}>{a.symbol} · {a.name}</option>)}</select>{err('symbol')}</div>
@@ -78,5 +79,5 @@ export function TransactionLedger() {
         <p className="ledger-notice" role="status">{notice}</p>
       </form>
     </section>
-  </div>;
+  </div></>;
 }

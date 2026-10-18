@@ -23,7 +23,7 @@ export function AnalyticsPage() {
     { label: 'Unrealised profit / loss', value: signedUsd(report.unrealised), context: 'Open positions · simulated quotes', icon: TrendingUp, gain: report.unrealised },
     { label: 'Combined profit / loss', value: signedUsd(report.totalProfitLoss), context: 'Realised + unrealised · no fees', icon: Layers, gain: report.totalProfitLoss },
   ];
-  return <div className="page">
+  return <div className="page analytics-page">
     <div className="page-heading"><div><h1>Portfolio analytics</h1><p>Allocation, gains and risk · simulated data · USD.</p></div><span className="plan-tag">SIMULATED</span></div>
     <section className="metrics" aria-label="Analytics summary">{metrics.map(({ label, value, context, icon: Icon, gain }) => <article className="metric" key={label}><div className="metric-label">{label}<Icon /></div><div className={`metric-value ${gain === null ? '' : gain >= 0 ? 'positive' : 'negative'}`}>{value}</div><div className="metric-footer">{context}</div></article>)}</section>
     <div className="chart-row">

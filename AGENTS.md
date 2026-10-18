@@ -16,3 +16,5 @@
 - Portfolio health scoring lives in src/lib/health.ts as pure, deterministic rules (input, threshold, status, points); UI only renders the report, so scores stay explainable and testable.
 - Average-cost ledger accounting is shared through src/lib/ledger-accounting.ts; analytics and transaction-derived holdings use it so realised gains and remaining costs cannot drift.
 - Advanced analytics calculations live in src/lib/analytics.ts; drawdown uses the existing synthetic value history and resets its running peak at each selected range, keeping assumptions explicit and testable.
+- Ledger files are parsed and previewed by pure functions in src/lib/ledger-files.ts using shared ledger validation; imports commit only after complete validation so partial rows never alter holdings.
+- All ledger mutations persist a rollback copy before publishing state; damaged storage stays untouched until explicit recovery, and stale previews or failed writes cannot alter the active ledger.
