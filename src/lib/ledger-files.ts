@@ -65,6 +65,7 @@ export function parseImport(text: string, format: 'csv' | 'json'): Transaction[]
 
 /** Detect duplicates before validating combined chronological holdings. No mutation. */
 export function previewImport(incoming: Transaction[], existing: Transaction[], mode: ImportMode) {
+  if (incoming.length > MAX_ROWS) throw new Error(`Maximum ${MAX_ROWS.toLocaleString()} rows`);
   const next = mode === 'merge' ? [...existing] : [];
   const byId = new Map(next.map((t) => [t.id, transactionIdentity(t)]));
   const identities = new Set(next.map(transactionIdentity));

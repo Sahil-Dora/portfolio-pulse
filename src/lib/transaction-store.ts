@@ -19,6 +19,7 @@ export type PortfolioState = ReturnType<typeof derive>;
 const sampleState = derive(mockTransactions);
 let state: PortfolioState = sampleState;
 let loaded = false;
+let savedRaw: string | null = null;
 export let storageAvailable = true;
 const listeners = new Set<() => void>();
 
@@ -27,6 +28,7 @@ function load() {
   loaded = true;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
+    savedRaw = raw;
     if (raw === null) return;
     try {
       const parsed = ledgerSchema.safeParse(JSON.parse(raw));
@@ -48,10 +50,11 @@ export function replaceTransactions(txs: Transaction[], expected: Transaction[],
   if (failure) return failure;
   try {
     const current = window.localStorage.getItem(STORAGE_KEY);
-    if (state.corruptRaw === null && current !== null && JSON.stringify(JSON.parse(current)) !== JSON.stringify(state.transactions)) return 'Saved data changed in another tab. Reload before making changes.';
+    if (current !== savedRaw) return 'Saved data changed in another tab. Reload before making changes.';
     // Keep a rollback copy before deletion, reset, import, or normal recording.
     window.localStorage.setItem(RECOVERY_KEY, current ?? JSON.stringify(state.transactions));
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(txs));
+    savedRaw = JSON.stringify(txs);
     storageAvailable = true;
   } catch { storageAvailable = false; return 'Could not save to browser storage. Existing transactions are unchanged. Download a backup and free storage, then retry.'; }
   state = derive(txs.map((t) => ({ ...t })));

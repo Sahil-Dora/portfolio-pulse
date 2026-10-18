@@ -93,4 +93,26 @@ describe('atomic storage and recovery', () => {
     expect(store.replaceTransactions([buy, sell], [buy])).toMatch(/another tab/);
     expect(localStorage.getItem(key)).toBe('[]');
   });
+  it('blocks a deleted storage key instead of overwriting another tab', async () => {
+    localStorage.setItem(key, JSON.stringify([buy])); const store = await load();
+    store.availableQuantity('AAPL', '2026-01-03'); localStorage.removeItem(key);
+    expect(store.replaceTransactions([], [buy])).toMatch(/another tab/);
+    expect(localStorage.getItem(key)).toBeNull();
+  });
+  it('keeps old state and rollback when the ledger write fails after rollback succeeds', async () => {
+    localStorage.setItem(key, JSON.stringify([buy])); const store = await load();
+    const original = Storage.prototype.setItem;
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (this: Storage, k, v) {
+      if (k === key) throw new Error('Quota');
+      original.call(this, k, v);
+    });
+    expect(store.replaceTransactions([], [buy])).toMatch(/Could not save/);
+    expect(store.previousLedger()).toEqual([buy]);
+    expect(store.availableQuantity('AAPL', '2026-01-03')).toBe(10);
+  });
+  it('preserves invalid calendar dates and duplicate IDs as damaged storage', async () => {
+    const raw = JSON.stringify([{ ...buy, date: '2026-02-30' }]); localStorage.setItem(key, raw);
+    const store = await load(); expect(store.addTransaction(sell)).toMatch(/Recover/);
+    expect(localStorage.getItem(key)).toBe(raw);
+  });
 });
