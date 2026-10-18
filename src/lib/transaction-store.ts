@@ -48,7 +48,7 @@ export function replaceTransactions(txs: Transaction[], expected: Transaction[],
   if (failure) return failure;
   try {
     const current = window.localStorage.getItem(STORAGE_KEY);
-    if (state.corruptRaw === null && current !== null && current !== JSON.stringify(state.transactions)) return 'Saved data changed in another tab. Reload before making changes.';
+    if (state.corruptRaw === null && current !== null && JSON.stringify(JSON.parse(current)) !== JSON.stringify(state.transactions)) return 'Saved data changed in another tab. Reload before making changes.';
     // Keep a rollback copy before deletion, reset, import, or normal recording.
     window.localStorage.setItem(RECOVERY_KEY, current ?? JSON.stringify(state.transactions));
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(txs));
