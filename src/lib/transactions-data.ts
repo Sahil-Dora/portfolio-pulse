@@ -31,12 +31,14 @@ export const mockTransactions: Transaction[] = [
 
 export const LEDGER_TODAY = '2026-10-15';
 
+export const validLedgerDate = (d: string) => /^\d{4}-\d{2}-\d{2}$/.test(d) && Number.isFinite(Date.parse(`${d}T00:00:00Z`)) && new Date(`${d}T00:00:00Z`).toISOString().slice(0, 10) === d;
+
 export const transactionSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a valid date').refine((d) => d <= LEDGER_TODAY, 'Date cannot be in the future'),
+  date: z.string().refine(validLedgerDate, 'Choose a valid date').refine((d) => d <= LEDGER_TODAY, 'Date cannot be in the future'),
   symbol: z.string().refine((s) => ledgerAssets.some((a) => a.symbol === s), 'Choose an asset'),
   type: z.enum(['buy', 'sell'], { message: 'Choose buy or sell' }),
-  quantity: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be greater than 0').max(1_000_000, 'Quantity is too large'),
-  price: z.coerce.number({ message: 'Enter a price' }).positive('Price must be greater than 0').max(10_000_000, 'Price is too large'),
+  quantity: z.coerce.number({ message: 'Enter a quantity' }).finite().positive('Quantity must be greater than 0').max(1_000_000, 'Quantity is too large'),
+  price: z.coerce.number({ message: 'Enter a price' }).finite().positive('Price must be greater than 0').max(10_000_000, 'Price is too large'),
 });
 
 /** Net quantity held for a symbol according to the ledger. */
