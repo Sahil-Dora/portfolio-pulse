@@ -1,33 +1,50 @@
-# Phase 8: Security Audit Findings (no code changed)
+# Phase 9 Preflight: Rule-Based Insights + What-If Price Shock
 
-## What was checked
-- Production dependency scan against the lockfile (52 packages).
-- Source search for secrets, keys, tokens, `eval`, `innerHTML`, `dangerouslySetInnerHTML`.
-- Repository root for `.env` / credential files and `.gitignore`.
-- Server entry, error page, and response headers.
+Planning only. No files changed, no installs, no commands that change anything.
 
-## Verified findings
+## What exists to reuse (checked)
+- Holdings come from the ledger via `usePortfolio()` in `src/lib/transaction-store.ts`.
+- `holdingMetrics` / `summarize` / `allocation` in `src/lib/portfolio-data.ts` give value, cost, P/L, and the stock/crypto split.
+- `evaluateHealth`, `weights`, `hhi`, `ESTIMATED_VOLATILITY` in `src/lib/health.ts` give concentration and risk rules.
+- `calculateAnalytics` and `calculateDrawdown` in `src/lib/analytics.ts` give realised/unrealised P/L and drawdown.
+- Overview already shows `HealthPanel`; Analytics uses the `panel` / `metrics` styles and the shared `Button`.
 
-1. **Dependency advisories (high, build/server-side only)**
-   - `source-map-js` via `@tailwindcss/vite` — denial-of-service in source-map parsing. Build-time tool; not shipped to users.
-   - `js-yaml` (2 advisories) via `@tanstack/react-start` — CPU exhaustion on crafted YAML. The app never parses user YAML, so not reachable by visitors.
-   - Smallest fix: update those two packages to the newest versions that include the patched sub-packages; if none exists yet, pin the patched sub-package versions via `overrides` in package.json. Then re-run tests and the dependency scan.
+## What gets built
+1. **Insights**: a short list of plain-language notes, each tied to a fixed rule, a threshold and the number that triggered it. For example: "BTC is 42% of your portfolio (above 35%)", "Crypto is 58% of value", "Largest drawdown in 1Y: −12% (simulated)", "AAPL has an unrealised loss". Each note says whether it was measured or estimated. The panel says "Not financial advice" and that the data is simulated.
+2. **What-if price shock**: two sliders, Stocks and Crypto, each from −50% to +50% in 5% steps, plus a Reset button. The panel shows the new total value, the change in value and P/L, the new stock/crypto split, and the health score after the shock. Nothing is saved, and the ledger is never changed.
 
-2. **No security headers set** (low-medium)
-   - Responses carry no Content-Security-Policy, X-Content-Type-Options, Referrer-Policy, or frame protection. Imported files are parsed as data and rendered as text, so no injection path was found, but headers add defence.
-   - Smallest fix: add the headers in the existing `src/server.ts` wrapper around the response (the verified Cloudflare/Nitro entry). CSP must allow Google Fonts and inline styles used by charts.
+Placement: both panels go on the Analytics page, below the existing sections. Overview stays as it is.
 
-## Checked and clear
-- No secrets, API keys, or `.env` files in the project; no backend credentials exist.
-- Only `dangerouslySetInnerHTML` is the chart theming helper using fixed, developer-defined colours — no user input.
-- No `eval` / `new Function` / raw `innerHTML`.
-- Error pages show no stack traces to visitors.
-- CSV formula injection, file/row limits, and atomic imports already covered by tests (Phase 7).
-- localStorage holds only simulated ledger data; no personal or account data.
+## Files
+- New `src/lib/insights.ts`: pure `generateInsights(holdings, analytics, drawdown)` returning `{ id, severity, kind, message, input, threshold }[]`. Thresholds are exported constants that reuse the health thresholds where they exist.
+- New `src/lib/what-if.ts`: pure `applyShock(holdings, { stock, crypto })`. It returns new holdings with only `price` scaled, then reuses `summarize`, `allocation` and `evaluateHealth`. Cost basis, quantity and realised P/L stay the same.
+- New `src/components/pulse/insights-panel.tsx` and `src/components/pulse/what-if-panel.tsx`, using the existing `panel` classes and shared `Button` / `Slider`.
+- Edit `src/components/pulse/analytics-page.tsx`: render the two panels.
+- Edit `src/styles.css`: a few rules for the insight list and slider rows, with 360px checked.
+- New tests `src/test/insights.test.ts` and `src/test/what-if.test.ts`.
+- After verification: one line each in `roadmap.md` and `AGENTS.md`.
 
-## Not verified
-- Live headers on the published site (app not yet published).
+## Edge cases
+- Empty ledger: no insights, only an empty-state message. The shock panel shows $0 and no health score, with no division by zero.
+- Only stocks or only crypto: the slider for the missing type does nothing and is labelled so.
+- Values are clamped to −50% to +50%. Bad values (NaN, out of range) fall back to 0. Prices can never go to zero or below.
+- A 0/0 shock must equal the current totals exactly.
+- Rounding: totals reconcile with `summarize` to the cent.
+- Insights are always in the same order, so output is the same for the same input.
+- Damaged-storage mode: the panels use the sample state shown, and the existing warning stays.
 
-## Proposed fixes on approval
-1. Dependency update/overrides + rescan.
-2. Security headers in the server wrapper + a small test confirming they are present.
+## Focused tests
+- `applyShock` at 0/0 equals the current summary.
+- −10% stocks only: stock value falls exactly 10%, crypto is unchanged, and the total equals the sum of the two.
+- Cost basis and realised P/L stay the same after a shock; unrealised P/L changes by the value change.
+- Clamping and NaN handling.
+- Empty and single-type portfolios.
+- Each insight fires exactly at, above and below its threshold, and does not fire otherwise.
+- Same input gives the same insight list.
+- The shocked health score matches `evaluateHealth` on the shocked holdings.
+
+## Verification on approval
+Run the full test suite, the TypeScript check and the production build. Check in the browser at 1280px and 360px with sliders moved and the ledger empty. Update `roadmap.md` only after all checks pass.
+
+## Not included
+No live prices, AI, backend, new packages, saved scenarios, or changes to existing calculations.
