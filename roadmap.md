@@ -8,3 +8,5 @@
 - [x] Phase 6: asset/type allocation, cost/value comparison, realised/unrealised P/L, simulated drawdown; 47 tests passed, automatic build OK, browser purchase/reload reconciliation and mobile/empty states verified. No separate manual typecheck/build run.
 - [x] Phase 6 final verification: 360px overflow fixed; mobile and empty states verified.
 - [x] Phase 7 essentials (89 tests, typecheck and production build passed): atomic CSV/JSON import with preview, export/backup, safe deletion/reset, recovery, and edge-case verification.
+
+- [x] Phase 8: Security fixes — patched source-map-js/js-yaml via overrides, security headers in server wrapper (verified: 93 tests, typecheck, build, clean dependency scan)
