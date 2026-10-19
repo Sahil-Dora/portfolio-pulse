@@ -18,3 +18,4 @@
 - Advanced analytics calculations live in src/lib/analytics.ts; drawdown uses the existing synthetic value history and resets its running peak at each selected range, keeping assumptions explicit and testable.
 - Ledger files are parsed and previewed by pure functions in src/lib/ledger-files.ts using shared ledger validation; imports commit only after complete validation so partial rows never alter holdings.
 - All ledger mutations persist a rollback copy before publishing state; damaged storage stays untouched until explicit recovery, and stale previews or failed writes cannot alter the active ledger.
+- Security headers are set once in src/lib/security-headers.ts and applied in the src/server.ts wrapper, so every response, including error pages, gets the same policy.
