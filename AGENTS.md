@@ -19,3 +19,4 @@
 - Ledger files are parsed and previewed by pure functions in src/lib/ledger-files.ts using shared ledger validation; imports commit only after complete validation so partial rows never alter holdings.
 - All ledger mutations persist a rollback copy before publishing state; damaged storage stays untouched until explicit recovery, and stale previews or failed writes cannot alter the active ledger.
 - Security headers are set once in src/lib/security-headers.ts and applied in the src/server.ts wrapper, so every response, including error pages, gets the same policy.
+- Insights (src/lib/insights.ts) and what-if shocks (src/lib/what-if.ts) are pure functions over derived holdings; shocks only scale prices in memory, so the ledger is never written.
