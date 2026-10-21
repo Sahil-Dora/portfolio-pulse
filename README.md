@@ -62,20 +62,21 @@ bun run dev        # http://localhost:8080
 
 ## Scripts
 
-| Script | Purpose |
-|---|---|
-| `bun run dev` | Start the dev server |
-| `bun run build` | Production build |
-| `bun run preview` | Preview the production build |
-| `bun run lint` | ESLint and Prettier checks |
-| `bun run format` | Apply Prettier formatting |
-| `bun run test` | Run the Vitest suite once |
-| `bun run test:watch` | Run Vitest in watch mode |
-| `bunx tsc --noEmit` | TypeScript type check |
+| Script               | Purpose                      |
+| -------------------- | ---------------------------- |
+| `bun run dev`        | Start the dev server         |
+| `bun run build`      | Production build             |
+| `bun run preview`    | Preview the production build |
+| `bun run lint`       | ESLint and Prettier checks   |
+| `bun run format`     | Apply Prettier formatting    |
+| `bun run test`       | Run the Vitest suite once    |
+| `bun run test:watch` | Run Vitest in watch mode     |
+| `bunx tsc --noEmit`  | TypeScript type check        |
 
 ## Tests
 
 Vitest and Testing Library tests in `src/test` cover:
+
 - average cost, totals, rounding, backdated trades and overselling
 - realised/unrealised P/L and drawdown
 - health rules, insights and what-if shocks
