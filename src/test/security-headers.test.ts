@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { withSecurityHeaders } from "@/lib/security-headers";
 
 describe("security headers", () => {
-  const res = withSecurityHeaders(new Response("ok", { status: 201, headers: { "content-type": "text/html" } }));
+  const res = withSecurityHeaders(
+    new Response("ok", { status: 201, headers: { "content-type": "text/html" } }),
+  );
   const csp = res.headers.get("Content-Security-Policy") ?? "";
 
   it("keeps status, body type", () => {

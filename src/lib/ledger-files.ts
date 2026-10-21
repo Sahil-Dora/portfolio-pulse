@@ -10,6 +10,8 @@ export type ImportMode = 'merge' | 'replace';
 /** All fields are quoted and spreadsheet formula prefixes are neutralised. */
 export const csvCell = (value: string | number) => {
   const text = String(value);
+  // Intentional: control characters before a formula prefix must be matched to block CSV formula injection.
+  // eslint-disable-next-line no-control-regex
   const safe = /^[\s\u0000-\u001f]*[=+\-@]/.test(text) || /^[\t\r\n]/.test(text) ? `'${text}` : text;
   return `"${safe.replaceAll('"', '""')}"`;
 };

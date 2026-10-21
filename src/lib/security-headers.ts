@@ -21,5 +21,9 @@ export const SECURITY_HEADERS: Record<string, string> = {
 export function withSecurityHeaders(response: Response): Response {
   const headers = new Headers(response.headers);
   for (const [k, v] of Object.entries(SECURITY_HEADERS)) headers.set(k, v);
-  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 }
