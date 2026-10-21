@@ -47,6 +47,7 @@ A stock and cryptocurrency portfolio analytics app that runs entirely in the bro
 - All market prices and history are simulated. Drawdown uses synthetic history, not ledger valuations.
 - Fees, dividends, splits, multiple currencies (USD only) and multiple portfolios are not supported.
 - Data is stored per browser. Clearing site data removes it, so download a backup first.
+- Ledger data in browser storage is not encrypted. Anyone with access to the device or browser profile, or a browser extension, can read it.
 - Health scores, insight thresholds and assumed volatility rates are illustrative.
 
 ## Setup
