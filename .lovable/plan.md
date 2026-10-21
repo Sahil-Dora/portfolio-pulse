@@ -1,50 +1,57 @@
-# Phase 9 Preflight: Rule-Based Insights + What-If Price Shock
+# Portfolio Pulse: Pre-Release Engineering Audit
 
-Planning only. No files changed, no installs, no commands that change anything.
+Audit only. No files changed. I reused earlier verified results instead of re-running them: 107 tests passing, a clean TypeScript check, a successful production build, a clean dependency scan, live security headers, and browser checks at 1280px and 360px from Phases 6–9.
 
-## What exists to reuse (checked)
-- Holdings come from the ledger via `usePortfolio()` in `src/lib/transaction-store.ts`.
-- `holdingMetrics` / `summarize` / `allocation` in `src/lib/portfolio-data.ts` give value, cost, P/L, and the stock/crypto split.
-- `evaluateHealth`, `weights`, `hhi`, `ESTIMATED_VOLATILITY` in `src/lib/health.ts` give concentration and risk rules.
-- `calculateAnalytics` and `calculateDrawdown` in `src/lib/analytics.ts` give realised/unrealised P/L and drawdown.
-- Overview already shows `HealthPanel`; Analytics uses the `panel` / `metrics` styles and the shared `Button`.
+## New checks run in this audit
+- Lint (ESLint and Prettier), the size of the existing build output, the project files, the README, page landmarks, and labels on icon-only buttons.
 
-## What gets built
-1. **Insights**: a short list of plain-language notes, each tied to a fixed rule, a threshold and the number that triggered it. For example: "BTC is 42% of your portfolio (above 35%)", "Crypto is 58% of value", "Largest drawdown in 1Y: −12% (simulated)", "AAPL has an unrealised loss". Each note says whether it was measured or estimated. The panel says "Not financial advice" and that the data is simulated.
-2. **What-if price shock**: two sliders, Stocks and Crypto, each from −50% to +50% in 5% steps, plus a Reset button. The panel shows the new total value, the change in value and P/L, the new stock/crypto split, and the health score after the shock. Nothing is saved, and the ledger is never changed.
+## Confirmed defects
 
-Placement: both panels go on the Analytics page, below the existing sections. Overview stays as it is.
+| # | Severity | Finding | Evidence | Impact | Smallest safe fix |
+|---|---|---|---|---|---|
+| 1 | High (release/demo) | Lint fails with 819 errors | `bunx eslint src`: 818 are Prettier formatting issues that can be fixed automatically. 1 is a real rule hit: `no-control-regex` at `src/lib/ledger-files.ts:13` | A reviewer running `npm run lint` sees it fail; this blocks any lint check in CI | Run `prettier --write` on `src` (formatting only). Add a scoped `eslint-disable-next-line no-control-regex` with a comment, because the control-character regex is intentional (it strips control characters for safety). Re-run tests. |
+| 2 | High (release/demo) | README is the generic template and still contains the original prompt text | `README.md` lines 1–20 | Weak first impression; nothing explains features, simulated data, the architecture or how to run tests | Rewrite the README: overview, features, "simulated data / not financial advice", architecture (derived holdings, pure calculation modules), scripts, testing, security notes and limitations. |
+| 3 | Medium | No CI | No `.github/` folder | Tests, typecheck and build are not checked automatically on every change | Add one free GitHub Actions workflow: install, lint, typecheck, test, build. |
+| 4 | Low | The whole app's code downloads as two large files: about 428 KB and 408 KB of JS | `dist/client/assets` (charts library bundled) | Slower first load on mobile; it still works | Optional: load the charts only when needed, using the existing lazy pattern. Not a blocker. |
+| 5 | Low | Some error pages use `min-h-screen` | `src/routes/__root.tsx:19,47` | Small layout jump on mobile browsers | Change to `min-h-dvh`. |
 
-## Files
-- New `src/lib/insights.ts`: pure `generateInsights(holdings, analytics, drawdown)` returning `{ id, severity, kind, message, input, threshold }[]`. Thresholds are exported constants that reuse the health thresholds where they exist.
-- New `src/lib/what-if.ts`: pure `applyShock(holdings, { stock, crypto })`. It returns new holdings with only `price` scaled, then reuses `summarize`, `allocation` and `evaluateHealth`. Cost basis, quantity and realised P/L stay the same.
-- New `src/components/pulse/insights-panel.tsx` and `src/components/pulse/what-if-panel.tsx`, using the existing `panel` classes and shared `Button` / `Slider`.
-- Edit `src/components/pulse/analytics-page.tsx`: render the two panels.
-- Edit `src/styles.css`: a few rules for the insight list and slider rows, with 360px checked.
-- New tests `src/test/insights.test.ts` and `src/test/what-if.test.ts`.
-- After verification: one line each in `roadmap.md` and `AGENTS.md`.
+## Checked and found no defect
+- Financial calculations: average cost, realised/unrealised P/L, totals, rounding, backdated trades, overselling, drawdown, insights and shocks. Covered by 107 passing tests, with sample totals reconciled ($95,507.48 value, $74,300 cost, $1,115.50 realised).
+- Data safety: imports apply all-or-nothing, a rollback copy is kept, damaged data is preserved until recovery, a change from another tab is detected and blocked, and failed saves leave data unchanged (Phase 7 tests and browser checks).
+- Security: no secrets in the project; protection against spreadsheet formula injection; file and row limits; content policy, nosniff, referrer policy and frame protection are all live; the dependency scan is clean.
+- Accessibility: one `<main>`, icon-only buttons have labels, sliders have names, `lang="en"` is set, and statuses use text, not colour alone.
+- Every page has a unique title and description.
 
-## Edge cases
-- Empty ledger: no insights, only an empty-state message. The shock panel shows $0 and no health score, with no division by zero.
-- Only stocks or only crypto: the slider for the missing type does nothing and is labelled so.
-- Values are clamped to −50% to +50%. Bad values (NaN, out of range) fall back to 0. Prices can never go to zero or below.
-- A 0/0 shock must equal the current totals exactly.
-- Rounding: totals reconcile with `summarize` to the cent.
-- Insights are always in the same order, so output is the same for the same input.
-- Damaged-storage mode: the panels use the sample state shown, and the existing warning stays.
+## Not verified, and why
+- **Live published site** (headers, hosting behaviour): the app is not published yet.
+- **Full screen-reader and keyboard-only walkthrough**: only spot checks were done. A full manual pass with an automated accessibility checker (axe) was not run.
+- **Lighthouse performance score**: not run. It needs the published site for meaningful numbers.
+- **Browsers other than Chromium** (Safari, Firefox): only Chromium was tested.
+- **Colour contrast on every token**: not measured. The theme tokens are used consistently, but they are unmeasured.
+- **Small tap-target sizes**: the 36px icon buttons in the header are below the 44px guideline. Not measured on a device.
 
-## Focused tests
-- `applyShock` at 0/0 equals the current summary.
-- −10% stocks only: stock value falls exactly 10%, crypto is unchanged, and the total equals the sum of the two.
-- Cost basis and realised P/L stay the same after a shock; unrealised P/L changes by the value change.
-- Clamping and NaN handling.
-- Empty and single-type portfolios.
-- Each insight fires exactly at, above and below its threshold, and does not fire otherwise.
-- Same input gives the same insight list.
-- The shocked health score matches `evaluateHealth` on the shocked holdings.
+## Optional improvements (not defects)
+- Add an automated accessibility test (axe) in the existing test setup.
+- Add a "Demo data" note to the profile name "Jamie Davis" in the sidebar. It is already labelled "Demo" nearby.
+- Increase icon-button tap targets on mobile to 44px.
 
-## Verification on approval
-Run the full test suite, the TypeScript check and the production build. Check in the browser at 1280px and 360px with sliders moved and the ledger empty. Update `roadmap.md` only after all checks pass.
+## Release-blocker checklist
+- [ ] Lint passes (finding 1)
+- [ ] README rewritten (finding 2)
+- [ ] CI workflow added and green (finding 3)
+- [x] Tests, typecheck and build pass
+- [x] Dependency scan clean; security headers present
+- [x] Simulated-data and "Not financial advice" labels present
+- [ ] Published, and live headers checked (needs your publish)
 
-## Not included
-No live prices, AI, backend, new packages, saved scenarios, or changes to existing calculations.
+## Resume and demo readiness
+- **Strengths:** a clean split between pure calculation code and the screens, thorough financial and data-safety tests, careful handling of bad files and broken saved data, security headers, and explainable scoring.
+- **Gaps a reviewer would notice:** failing lint, the generic README, and no CI. Fixing findings 1–3 makes the project ready to show.
+- **Status:** functionally ready; presentation is not ready until findings 1–3 are fixed.
+
+## Proposed order on approval
+1. Fix lint: formatting plus the one rule exception. Re-run tests.
+2. Rewrite the README.
+3. Add the CI workflow.
+4. Optionally, findings 5 and then 4.
+5. Re-run lint, typecheck, tests and build, and report the actual results.
