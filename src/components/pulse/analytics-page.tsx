@@ -6,13 +6,16 @@ import { usePortfolio } from '@/lib/transaction-store';
 import { calculateAnalytics, calculateDrawdown } from '@/lib/analytics';
 import { rangeDays, sliceHistory, signedUsd, usd, type RangeKey } from '@/lib/portfolio-data';
 import { AllocationPanel } from './portfolio-charts';
+import { generateInsights } from '@/lib/insights';
+import { InsightsPanel } from './insights-panel';
+import { WhatIfPanel } from './what-if-panel';
 
 const ranges = Object.keys(rangeDays) as RangeKey[];
 const fmtDate = (date: string) => new Date(`${date}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 const tooltipStyle = { background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 11 };
 
 export function AnalyticsPage() {
-  const { transactions, history } = usePortfolio();
+  const { transactions, history, holdings } = usePortfolio();
   const report = calculateAnalytics(transactions);
   const [range, setRange] = useState<RangeKey>('1Y');
   const drawdown = calculateDrawdown(sliceHistory(history, range));
@@ -40,6 +43,8 @@ export function AnalyticsPage() {
       <div className="performance-chart"><ResponsiveContainer width="100%" height="100%"><AreaChart data={drawdown.points} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}><CartesianGrid vertical={false} stroke="var(--chart-grid)" strokeDasharray="4 4" /><XAxis dataKey="date" tickFormatter={fmtDate} minTickGap={28} axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }} /><YAxis domain={[0, 'auto']} reversed tickFormatter={(v: number) => `${v.toFixed(0)}%`} width={44} axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }} /><Tooltip labelFormatter={(l: string) => fmtDate(l)} formatter={(v: number) => [`${v.toFixed(2)}%`, 'Drawdown']} contentStyle={tooltipStyle} /><Area dataKey="drawdownPct" type="linear" stroke="var(--destructive)" fill="var(--analytics-drawdown-fill)" strokeWidth={2} isAnimationActive={false} /></AreaChart></ResponsiveContainer></div>
       <p className="analytics-note">Synthetic value history scaled to current holdings, not historical ledger valuations or cash-flow-adjusted returns. Not financial advice.</p>
     </section>
+    <InsightsPanel insights={generateInsights(holdings, report, drawdown)} empty={!holdings.length} />
+    <WhatIfPanel holdings={holdings} />
     <footer className="page-footer"><span>Simulated data · Not connected to live markets</span><span>Portfolio Pulse © 2026</span></footer>
   </div>;
 }

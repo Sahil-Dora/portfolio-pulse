@@ -10,3 +10,4 @@
 - [x] Phase 7 essentials (89 tests, typecheck and production build passed): atomic CSV/JSON import with preview, export/backup, safe deletion/reset, recovery, and edge-case verification.
 
 - [x] Phase 8: Security fixes — patched source-map-js/js-yaml via overrides, security headers in server wrapper (verified: 93 tests, typecheck, build, clean dependency scan)
+- [x] Phase 9: rule-based insights and what-if stock/crypto price shock on Analytics (verified: 107 tests, typecheck, build, 1280px/360px and empty ledger)
