@@ -15,6 +15,9 @@ describe("security headers", () => {
     expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
     expect(res.headers.get("Referrer-Policy")).toBe("strict-origin-when-cross-origin");
   });
+  it("disables camera, microphone and location", () => {
+    expect(res.headers.get("Permissions-Policy")).toBe("camera=(), microphone=(), geolocation=()");
+  });
   it("CSP blocks framing by unknown sites and plugins", () => {
     expect(csp).toContain("frame-ancestors 'self'");
     expect(csp).toContain("object-src 'none'");
