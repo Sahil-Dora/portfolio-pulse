@@ -23,8 +23,8 @@ const largeLedger = () =>
   Array.from({ length: MAX_ROWS }, (_, i) => ({
     ...buy,
     id: `b${String(i).padStart(63, "0")}`,
-    quantity: 1.234567890123456e-100,
-    price: 9999999.123456789,
+    quantity: 1.2345678901234567e-100,
+    price: 1.2345678901234567e-100,
   }));
 
 describe("Phase 10 ledger safety", () => {
