@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LEDGER_TODAY, ledgerAssets, validLedgerDate, type Transaction } from "./transactions-data";
+import { cleanQuantity, exceedsQuantity } from "./ledger-accounting";
 
 export const MAX_ROWS = 10_000;
 export const MAX_FILE_BYTES = 2 * 1024 * 1024;
@@ -20,7 +21,13 @@ export const storedTransactionSchema = z
     price: z.number().finite().positive().max(10_000_000),
   })
   .strict();
-export const ledgerSchema = z.array(storedTransactionSchema).max(MAX_ROWS);
+export const ledgerSchema = z.preprocess((value, ctx) => {
+  if (Array.isArray(value) && value.length > MAX_ROWS) {
+    ctx.addIssue({ code: "custom", message: `Maximum ${MAX_ROWS} rows` });
+    return z.NEVER;
+  }
+  return value;
+}, z.array(storedTransactionSchema).max(MAX_ROWS));
 export const transactionIdentity = (t: Transaction) =>
   JSON.stringify([t.date, t.symbol, t.type, t.quantity, t.price]);
 
@@ -35,8 +42,10 @@ export function ledgerError(txs: Transaction[]): string | null {
   )) {
     if (ids.has(t.id)) return `Duplicate transaction ID: ${t.id}`;
     ids.add(t.id);
-    const q = (held.get(t.symbol) ?? 0) + (t.type === "buy" ? t.quantity : -t.quantity);
-    if (q < -1e-9) return `Not enough ${t.symbol} held on that date`;
+    const balance = held.get(t.symbol) ?? 0;
+    if (t.type === "sell" && exceedsQuantity(t.quantity, balance))
+      return `Not enough ${t.symbol} held on that date`;
+    const q = cleanQuantity(balance + (t.type === "buy" ? t.quantity : -Math.min(t.quantity, balance)));
     held.set(t.symbol, q);
   }
   return null;

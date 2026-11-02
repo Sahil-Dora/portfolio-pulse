@@ -20,5 +20,9 @@
 - Advanced analytics calculations live in src/lib/analytics.ts; drawdown uses the existing synthetic value history and resets its running peak at each selected range, keeping assumptions explicit and testable.
 - Ledger files are parsed and previewed by pure functions in src/lib/ledger-files.ts using shared ledger validation; imports commit only after complete validation so partial rows never alter holdings.
 - All ledger mutations persist a rollback copy before publishing state; damaged storage stays untouched until explicit recovery, and stale previews or failed writes cannot alter the active ledger.
+- Import deduplication uses transaction IDs, not trade contents, so distinct identical trades survive restoration.
+- Quantity arithmetic uses relative floating-point tolerance, never an absolute dust cutoff, so valid small positions remain accounted for.
+- Saved ledger mutations must fit a compact versioned JSON backup within the import byte limit, so new saved states remain restorable.
+- Backdated sell availability follows the minimum balance after the candidate's date-and-ID ordering, so later purchases cannot mask an intervening shortage.
 - Security headers are set once in src/lib/security-headers.ts and applied in the src/server.ts wrapper, so every response, including error pages, gets the same policy.
 - Insights (src/lib/insights.ts) and what-if shocks (src/lib/what-if.ts) are pure functions over derived holdings; shocks only scale prices in memory, so the ledger is never written.

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usd } from "@/lib/portfolio-data";
+import { exceedsQuantity } from "@/lib/ledger-accounting";
 import {
   addTransaction,
   availableQuantity,
@@ -29,7 +30,7 @@ const fmtDate = (d: string) =>
     year: "numeric",
     timeZone: "UTC",
   });
-const fmtQty = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 8 });
+const fmtQty = (n: number) => n.toLocaleString("en-US", { maximumSignificantDigits: 15 });
 
 export function TransactionLedger() {
   const items = usePortfolio().transactions;
@@ -63,6 +64,7 @@ export function TransactionLedger() {
   function submit(e: FormEvent) {
     e.preventDefault();
     const parsed = transactionSchema.safeParse(form);
+    const id = `n${Date.now()}`;
     const next: Errors = {};
     if (!parsed.success)
       for (const issue of parsed.error.issues) {
@@ -70,13 +72,13 @@ export function TransactionLedger() {
         next[k] ??= issue.message;
       }
     else if (parsed.data.type === "sell") {
-      const held = availableQuantity(parsed.data.symbol, parsed.data.date);
-      if (parsed.data.quantity > held + 1e-9)
+      const held = availableQuantity(parsed.data.symbol, parsed.data.date, id);
+      if (exceedsQuantity(parsed.data.quantity, held))
         next.quantity = `You only hold ${fmtQty(held)} ${parsed.data.symbol}`;
     }
     setErrors(next);
     if (Object.keys(next).length || !parsed.success) return;
-    const t: Transaction = { id: `n${Date.now()}`, ...parsed.data };
+    const t: Transaction = { id, ...parsed.data };
     const failure = addTransaction(t);
     if (failure) {
       setErrors({ quantity: failure });

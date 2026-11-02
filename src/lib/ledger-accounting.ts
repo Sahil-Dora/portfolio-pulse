@@ -1,6 +1,11 @@
 import { mockHoldings, type Holding } from "./portfolio-data";
 import type { Transaction } from "./transactions-data";
 
+/** Remove binary arithmetic noise without imposing an absolute minimum quantity. */
+export const cleanQuantity = (value: number) => Number(value.toPrecision(15));
+export const exceedsQuantity = (sold: number, held: number) =>
+  sold - held > Math.max(Math.abs(sold), Math.abs(held)) * Number.EPSILON * 8;
+
 /** Average-cost accounting; same-day trades use the ledger's existing ID order. */
 export function ledgerPositions(transactions: Transaction[]) {
   const sorted = [...transactions].sort(
@@ -13,16 +18,16 @@ export function ledgerPositions(transactions: Transaction[]) {
     for (const t of sorted) {
       if (t.symbol !== quote.symbol) continue;
       if (t.type === "buy") {
-        quantity += t.quantity;
+        quantity = cleanQuantity(quantity + t.quantity);
         cost += t.quantity * t.price;
       } else {
         const sold = Math.min(t.quantity, quantity);
         const removedCost = quantity ? (cost / quantity) * sold : 0;
         realised += sold * t.price - removedCost;
         cost -= removedCost;
-        quantity -= sold;
+        quantity = cleanQuantity(quantity - sold);
       }
-      if (quantity <= 1e-9) {
+      if (quantity <= 0) {
         quantity = 0;
         cost = 0;
       }
@@ -33,12 +38,12 @@ export function ledgerPositions(transactions: Transaction[]) {
 
 export function holdingsFromTransactions(transactions: Transaction[]): Holding[] {
   return ledgerPositions(transactions).flatMap(({ quote, quantity, cost }) =>
-    quantity <= 1e-9
+    quantity <= 0
       ? []
       : [
           {
             ...quote,
-            quantity: Math.round(quantity * 1e8) / 1e8,
+            quantity,
             avgCost: cost / quantity,
           },
         ],

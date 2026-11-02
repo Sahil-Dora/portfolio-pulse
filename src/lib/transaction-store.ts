@@ -2,8 +2,9 @@
 import { useSyncExternalStore } from "react";
 import { buildHistory, summarize } from "./portfolio-data";
 import { mockTransactions, type Transaction } from "./transactions-data";
-import { holdingsFromTransactions } from "./ledger-accounting";
+import { cleanQuantity, holdingsFromTransactions } from "./ledger-accounting";
 import { ledgerError, ledgerSchema } from "./ledger-validation";
+import { exportBackup } from "./ledger-files";
 export { holdingsFromTransactions } from "./ledger-accounting";
 
 export const STORAGE_KEY = "portfolio-pulse:transactions:v1";
@@ -73,6 +74,11 @@ export function replaceTransactions(
   const failure = ledgerError(txs);
   if (failure) return failure;
   try {
+    exportBackup(txs);
+  } catch (error) {
+    return error instanceof Error ? error.message : "Ledger exceeds backup size limit";
+  }
+  try {
     const current = window.localStorage.getItem(STORAGE_KEY);
     if (current !== savedRaw)
       return "Saved data changed in another tab. Reload before making changes.";
@@ -114,14 +120,20 @@ export function previousLedger(): Transaction[] {
 }
 
 /** Quantity available to sell as of a date (respects later sells). */
-export function availableQuantity(symbol: string, date: string) {
+export function availableQuantity(symbol: string, date: string, id = `n${Date.now()}`) {
   load();
-  const txs = state.transactions.filter((t) => t.symbol === symbol);
-  const upTo = txs
-    .filter((t) => t.date <= date)
-    .reduce((s, t) => s + (t.type === "buy" ? t.quantity : -t.quantity), 0);
-  const total = txs.reduce((s, t) => s + (t.type === "buy" ? t.quantity : -t.quantity), 0);
-  return Math.max(0, Math.min(upTo, total));
+  const txs = state.transactions.filter((t) => t.symbol === symbol).sort(
+    (a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id),
+  );
+  let balance = 0;
+  let minimum = Infinity;
+  for (const t of txs) {
+    const afterCandidate = t.date > date || (t.date === date && t.id.localeCompare(id) >= 0);
+    if (afterCandidate) minimum = Math.min(minimum, balance);
+    balance = cleanQuantity(balance + (t.type === "buy" ? t.quantity : -t.quantity));
+    if (afterCandidate) minimum = Math.min(minimum, balance);
+  }
+  return Math.max(0, Math.min(minimum, balance));
 }
 
 const subscribe = (l: () => void) => {
