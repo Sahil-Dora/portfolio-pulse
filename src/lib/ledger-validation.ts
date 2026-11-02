@@ -45,7 +45,9 @@ export function ledgerError(txs: Transaction[]): string | null {
     const balance = held.get(t.symbol) ?? 0;
     if (t.type === "sell" && exceedsQuantity(t.quantity, balance))
       return `Not enough ${t.symbol} held on that date`;
-    const q = cleanQuantity(balance + (t.type === "buy" ? t.quantity : -Math.min(t.quantity, balance)));
+    const q = cleanQuantity(
+      balance + (t.type === "buy" ? t.quantity : -Math.min(t.quantity, balance)),
+    );
     held.set(t.symbol, q);
   }
   return null;

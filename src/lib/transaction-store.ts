@@ -122,9 +122,9 @@ export function previousLedger(): Transaction[] {
 /** Quantity available to sell as of a date (respects later sells). */
 export function availableQuantity(symbol: string, date: string, id = `n${Date.now()}`) {
   load();
-  const txs = state.transactions.filter((t) => t.symbol === symbol).sort(
-    (a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id),
-  );
+  const txs = state.transactions
+    .filter((t) => t.symbol === symbol)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
   let balance = 0;
   let minimum = Infinity;
   for (const t of txs) {

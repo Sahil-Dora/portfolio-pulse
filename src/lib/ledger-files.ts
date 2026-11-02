@@ -33,9 +33,16 @@ export const csvCell = (value: string | number) => {
 export const exportCsv = (txs: Transaction[]) =>
   [columns.join(","), ...txs.map((t) => columns.map((c) => csvCell(t[c])).join(","))].join("\r\n");
 export const exportBackup = (txs: Transaction[]) => {
-  const text = JSON.stringify({ app: "Portfolio Pulse", version: 1, currency: "USD", transactions: txs });
+  const text = JSON.stringify({
+    app: "Portfolio Pulse",
+    version: 1,
+    currency: "USD",
+    transactions: txs,
+  });
   if (new TextEncoder().encode(text).length > MAX_FILE_BYTES)
-    throw new Error("JSON backup exceeds 2 MiB. Export CSV instead and reduce the ledger before saving.");
+    throw new Error(
+      "JSON backup exceeds 2 MiB. Export CSV instead and reduce the ledger before saving.",
+    );
   return text;
 };
 
