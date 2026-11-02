@@ -32,12 +32,19 @@ export const csvCell = (value: string | number) => {
 };
 export const exportCsv = (txs: Transaction[]) =>
   [columns.join(","), ...txs.map((t) => columns.map((c) => csvCell(t[c])).join(","))].join("\r\n");
-export const exportBackup = (txs: Transaction[]) =>
-  JSON.stringify(
-    { app: "Portfolio Pulse", version: 1, currency: "USD", transactions: txs },
-    null,
-    2,
-  );
+export const exportBackup = (txs: Transaction[]) => {
+  const text = JSON.stringify({
+    app: "Portfolio Pulse",
+    version: 1,
+    currency: "USD",
+    transactions: txs,
+  });
+  if (new TextEncoder().encode(text).length > MAX_FILE_BYTES)
+    throw new Error(
+      "JSON backup exceeds 2 MiB. Export CSV instead and reduce the ledger before saving.",
+    );
+  return text;
+};
 
 /** Strict RFC-style CSV reader: quoted commas/newlines and escaped quotes; no silent row loss. */
 function parseCsv(text: string) {
@@ -125,7 +132,6 @@ export function previewImport(incoming: Transaction[], existing: Transaction[], 
   if (incoming.length > MAX_ROWS) throw new Error(`Maximum ${MAX_ROWS.toLocaleString()} rows`);
   const next = mode === "merge" ? [...existing] : [];
   const byId = new Map(next.map((t) => [t.id, transactionIdentity(t)]));
-  const identities = new Set(next.map(transactionIdentity));
   let duplicates = 0;
   for (const row of incoming) {
     storedTransactionSchema.parse(row);
@@ -133,13 +139,12 @@ export function previewImport(incoming: Transaction[], existing: Transaction[], 
     const prior = byId.get(row.id);
     if (prior !== undefined && prior !== identity)
       throw new Error(`Conflicting ID ${row.id}; existing data is unchanged`);
-    if (prior !== undefined || identities.has(identity)) {
+    if (prior !== undefined) {
       duplicates++;
       continue;
     }
     next.push(row);
     byId.set(row.id, identity);
-    identities.add(identity);
   }
   const failure = ledgerError(next);
   if (failure) throw new Error(failure);

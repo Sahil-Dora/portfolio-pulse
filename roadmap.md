@@ -14,4 +14,5 @@
 - [x] Phase 9: rule-based insights and what-if stock/crypto price shock on Analytics (verified: 107 tests, typecheck, build, 1280px/360px and empty ledger)
 - [x] Pre-release fixes 1–3: lint passes, README rewritten, GitHub Actions CI added
 - [x] Pre-Phase 10 security: .env ignored, Permissions-Policy header + test, README notes unencrypted browser data (verified: lint, 108 tests, typecheck, build)
-- [ ] Phase 10: audit code quality, security, data safety, mobile layout, README and CI; fix confirmed defects and record verification without publishing.
+- [x] Phase 10 scoped fixes: patched Zod/Seroval; restore preserves distinct identical trade IDs; relative-tolerance tiny-quantity accounting; compact size-checked JSON backups; chronological backdated sell availability. Verified 117 passing tests, lint with 0 errors/6 existing warnings, clean 52-package production dependency scan, and browser restore/backup/backdated rejection plus 360px page widths; automatic preview build reports OK.
+- [ ] Phase 10 final release verification: separate TypeScript and production-build checks were not executed because this environment prohibits manual project builds/typechecks; remote GitHub CI and deployed behavior remain unverified. No publishing or deployment performed.

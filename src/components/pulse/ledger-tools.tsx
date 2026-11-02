@@ -159,12 +159,16 @@ export function LedgerTools() {
         <Button
           size="sm"
           variant="outline"
-          onClick={() =>
-            void deliverFile(
-              new Blob([exportBackup(transactions)], { type: "application/json" }),
-              "portfolio-pulse-backup.json",
-            )
-          }
+          onClick={() => {
+            try {
+              void deliverFile(
+                new Blob([exportBackup(transactions)], { type: "application/json" }),
+                "portfolio-pulse-backup.json",
+              );
+            } catch (failure) {
+              setError(failure instanceof Error ? failure.message : "Could not create backup");
+            }
+          }}
         >
           <Download />
           JSON backup
