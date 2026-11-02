@@ -86,7 +86,9 @@ describe("Phase 10 ledger safety", () => {
   it("compacts formerly oversized backups without losing trades", () => {
     const trades = largeLedger();
     expect(ledgerError(trades)).toBeNull();
-    expect(new TextEncoder().encode(JSON.stringify(trades, null, 2)).length).toBeGreaterThan(MAX_FILE_BYTES);
+    expect(new TextEncoder().encode(JSON.stringify(trades, null, 2)).length).toBeGreaterThan(
+      MAX_FILE_BYTES,
+    );
     expect(parseImport(exportBackup(trades), "json")).toEqual(trades);
   });
 
