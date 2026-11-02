@@ -83,13 +83,19 @@ describe("Phase 10 ledger safety", () => {
     expect(parseImport(text, "json")).toEqual(trades);
   });
 
-  it("rejects oversized backups and commits without changing active or rollback data", async () => {
+  it("compacts formerly oversized backups without losing trades", () => {
     const trades = largeLedger();
     expect(ledgerError(trades)).toBeNull();
+    expect(new TextEncoder().encode(JSON.stringify(trades, null, 2)).length).toBeGreaterThan(MAX_FILE_BYTES);
+    expect(parseImport(exportBackup(trades), "json")).toEqual(trades);
+  });
+
+  it("rejects over-limit exports and commits without changing active or rollback data", async () => {
+    const trades = [...largeLedger(), ...largeLedger()];
     expect(() => exportBackup(trades)).toThrow(/2 MiB/);
     localStorage.setItem(key, JSON.stringify([buy]));
     const store = await import("@/lib/transaction-store");
-    expect(store.replaceTransactions(trades, [buy])).toMatch(/2 MiB/);
+    expect(store.replaceTransactions(trades, [buy])).toMatch(/row limit/);
     expect(localStorage.getItem(key)).toBe(JSON.stringify([buy]));
     expect(localStorage.getItem(store.RECOVERY_KEY)).toBeNull();
   });
