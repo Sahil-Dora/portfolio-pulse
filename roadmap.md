@@ -3,7 +3,8 @@
 - [x] Create the premium responsive app shell and navigation.
 - [x] Add initial destination layouts without advanced features.
 - [x] Verify desktop, mobile, and navigation.
-- [x] Phase 2: typed mock holdings, calculated KPIs, range chart, allocation doughnut.- [x] Phase 3: simulated transaction ledger with search, filters and validated buy/sell form.
+- [x] Phase 2: typed mock holdings, calculated KPIs, range chart, allocation doughnut.
+- [x] Phase 3: simulated transaction ledger with search, filters and validated buy/sell form.
 - [x] Phase 4: localStorage-persisted ledger; holdings, KPIs and charts derived from transactions.
 - [x] Phase 5: calculation tests (average cost, totals, rounding, backdated, oversell, corrupt storage) and rules-based health engine with Overview panel.
 - [x] Phase 6: asset/type allocation, cost/value comparison, realised/unrealised P/L, simulated drawdown; 47 tests passed, automatic build OK, browser purchase/reload reconciliation and mobile/empty states verified. No separate manual typecheck/build run.
@@ -15,4 +16,10 @@
 - [x] Pre-release fixes 1–3: lint passes, README rewritten, GitHub Actions CI added
 - [x] Pre-Phase 10 security: .env ignored, Permissions-Policy header + test, README notes unencrypted browser data (verified: lint, 108 tests, typecheck, build)
 - [x] Phase 10 scoped fixes: patched Zod/Seroval; restore preserves distinct identical trade IDs; relative-tolerance tiny-quantity accounting; compact size-checked JSON backups; chronological backdated sell availability. Verified 117 passing tests, lint with 0 errors/6 existing warnings, clean 52-package production dependency scan, and browser restore/backup/backdated rejection plus 360px page widths; automatic preview build reports OK.
-- [ ] Phase 10 final release verification: separate TypeScript and production-build checks were not executed because this environment prohibits manual project builds/typechecks; remote GitHub CI and deployed behavior remain unverified. No publishing or deployment performed.
+- [x] Phase 10 final verification: GitHub Actions CI run #6 passed install, lint (0 errors), TypeScript, 117 tests and production build. Not published or deployed.
+- [ ] Phase 11: Authentication and profiles
+- [ ] Phase 12: Database, transactions and strict RLS
+- [ ] Phase 13: Crypto market data and caching
+- [ ] Phase 14: Optional, secure AI analysis
+- [ ] Phase 15: Frontend integration and safe cloud migration
+- [ ] Phase 16: Security, testing and release readiness
